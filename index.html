@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Application Penetration Testing Tool</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .tab {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
+        .tabbutton {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button class="tabbutton" onclick="openTab('homeTab')">Home</button>
+        <button class="tabbutton" onclick="openTab('scannerTab')">Scanner</button>
+        <button class="tabbutton" onclick="openTab('vulnerabilityLibraryTab')">Vulnerability Library</button>
+        <button class="tabbutton" onclick="openTab('reportingTab')">Reporting</button>
+        <button class="tabbutton" onclick="openTab('toolsUtilitiesTab')">Tools & Utilities</button>
+    </div>
+
+    <div id="homeTab" class="tab" style="display:block;">
+        <h3>Welcome to the Home Tab</h3>
+        <p>This is your starting point. Add relevant information or tools here.</p>
+    </div>
+
+    <div id="scannerTab" class="tab">
+        <h3>Scanner</h3>
+        <form id="scanForm">
+            <label for="urlInput">URL:</label>
+            <input type="text" id="urlInput" name="url" placeholder="Enter URL here">
+            <label for="scanType">Scan Type:</label>
+            <select name="scanType" id="scanType">
+                <option value="quick">Quick Scan</option>
+                <option value="full">Full Scan</option>
+                <option value="custom">Custom Scan</option>
+            </select>
+            <input type="submit" value="Initiate Scan">
+        </form>
+        <div id="scanResult"></div>
+    </div>
+
+    <!-- Other tabs -->
+    <div id="vulnerabilityLibraryTab" class="tab">
+        <h3>Vulnerability Library</h3>
+        <p>Details about various vulnerabilities will be listed here.</p>
+    </div>
+
+    <div id="reportingTab" class="tab">
+        <h3>Reporting</h3>
+        <p>Generated reports and history will be available here.</p>
+    </div>
+
+    <div id="toolsUtilitiesTab" class="tab">
+        <h3>Tools & Utilities</h3>
+        <p>Various tools and utilities for penetration testing will be accessible here.</p>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#scanForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/scan',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        let resultHTML = "<h4>Scan Results:</h4>";
+                        if(response.vulnerabilities && response.vulnerabilities.length > 0) {
+                            resultHTML += "<ul>";
+                            response.vulnerabilities.forEach(function(vuln){
+                                resultHTML += "<li>" + vuln.type + ": " + vuln.details + "</li>";
+                            });
+                            resultHTML += "</ul>";
+                        } else {
+                            resultHTML += "<p>No vulnerabilities found, or scan was not successful.</p>";
+                        }
+                        $('#scanResult').html(resultHTML);
+                        openTab('scannerTab');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error: ", status, error);
+                        $('#scanResult').html("An error occurred: " + error);
+                    }
+                });
+            });
+        });
+
+        function openTab(tabId) {
+            $('.tab').hide();
+            $('#' + tabId).show();
+        }
+    </script>
+</body>
+</html>
+
